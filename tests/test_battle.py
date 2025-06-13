@@ -10,8 +10,8 @@ def test_player_attack_reduces_enemy_hp() -> None:
     player = Player("Tester", attack_min=10, attack_max=10, rng=rng)
     enemy = Enemy("Dummy", max_hp=30, attack_min=0, attack_max=0, rng=rng)
     battle = Battle(player, enemy, rng=rng)
-    message = battle.player_turn("a")
-    assert "10 damage" in message
+    message = battle.player_turn("s")
+    assert "10 physical" in message
     assert enemy.hp == 20
 
 

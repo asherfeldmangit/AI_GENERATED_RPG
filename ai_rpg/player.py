@@ -15,9 +15,15 @@ class Player:
     level: int = 1
     experience: int = 0
     exp_to_next: int = 100
+    speed: int = 10
     potion_heal_amount: int = 20
     potions: int = 3
     rng: random.Random = field(default_factory=random.Random, repr=False)
+
+    magic_min: int = 8
+    magic_max: int = 15
+
+    defending: bool = field(default=False, init=False)
 
     hp: int = field(init=False)
 
@@ -28,12 +34,18 @@ class Player:
     def alive(self) -> bool:
         return self.hp > 0
 
-    def attack(self) -> int:
-        """Calculate player's attack damage."""
+    def physical_attack(self) -> int:
         base = self.rng.randint(self.attack_min, self.attack_max)
         return base + (self.level - 1)
 
+    def magic_attack(self) -> int:
+        base = self.rng.randint(self.magic_min, self.magic_max)
+        return base + (self.level - 1)
+
     def receive_damage(self, amount: int) -> None:
+        if self.defending:
+            amount = int(amount * 0.5)
+            self.defending = False  # reset after damage mitigation
         self.hp = max(self.hp - amount, 0)
 
     def heal(self) -> int:

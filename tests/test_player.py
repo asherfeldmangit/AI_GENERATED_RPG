@@ -8,7 +8,7 @@ from ai_rpg.player import Player
 def test_attack_within_range() -> None:
     rng = random.Random(0)
     p = Player("Tester", attack_min=1, attack_max=3, rng=rng)
-    damages = {p.attack() for _ in range(100)}
+    damages = {p.physical_attack() for _ in range(100)}
     assert damages <= {1, 2, 3}
 
 

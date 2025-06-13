@@ -16,16 +16,26 @@ class Battle:
         self.rng = rng or random.Random()
 
     def player_turn(self, action: str) -> str:
-        if action == "a":
-            dmg = self.player.attack()
+        action = action.lower()[:1]
+        if action in {"s", "a"}:  # strike / attack (physical)
+            dmg = self.player.physical_attack()
             self.enemy.receive_damage(dmg)
-            return f"You strike the {self.enemy.name} for {dmg} damage!"
+            return f"You strike the {self.enemy.name} for {dmg} physical damage!"
+        elif action == "m":
+            dmg = self.player.magic_attack()
+            from .types import DamageType
+
+            self.enemy.receive_damage(dmg, DamageType.MAGIC)
+            return f"You cast a spell on the {self.enemy.name} for {dmg} magic damage!"
         elif action == "h":
             try:
                 healed = self.player.heal()
                 return f"You quaff a potion and regain {healed} HP!"
             except RuntimeError as err:
                 return str(err)
+        elif action == "d":
+            self.player.defending = True
+            return "You raise your guard, preparing to block the next attack!"
         else:
             return "Invalid action. You hesitate and lose your turn!"
 
@@ -49,9 +59,20 @@ class Battle:
             print(self.player.full_status())
             print(self.enemy.full_status())
             action = player_action_callback(self)
-            print(self.player_turn(action))
-            if self.enemy.alive:
+
+            # determine initiatives
+            player_init = self.rng.randint(1, 20) + self.player.speed
+            enemy_init = self.rng.randint(1, 20) + self.enemy.speed
+
+            if player_init >= enemy_init:
+                # player acts first
+                print(self.player_turn(action))
+                if self.enemy.alive:
+                    print(self.enemy_turn())
+            else:
                 print(self.enemy_turn())
+                if self.player.alive:
+                    print(self.player_turn(action))
         print("\nBattle Over!")
         if self.player.alive:
             print("You are victorious!")

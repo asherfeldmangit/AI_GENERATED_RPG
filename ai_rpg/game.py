@@ -7,6 +7,7 @@ from .battle import Battle
 from .enemy import Enemy
 from .player import Player
 from .story import story_event
+from .types import DamageType
 
 ASCII_ARTS = {
     "Slime": r"""
@@ -37,13 +38,22 @@ ASCII_ARTS = {
 
 def build_enemies(rng: random.Random) -> list[Enemy]:
     return [
-        Enemy("Slime", max_hp=30, attack_min=5, attack_max=10, ascii_art=ASCII_ARTS["Slime"], rng=rng),
+        Enemy(
+            "Slime",
+            max_hp=30,
+            attack_min=5,
+            attack_max=10,
+            ascii_art=ASCII_ARTS["Slime"],
+            weak_to=DamageType.MAGIC,
+            rng=rng,
+        ),
         Enemy(
             "Goblin",
             max_hp=50,
             attack_min=8,
             attack_max=15,
             ascii_art=ASCII_ARTS["Goblin"],
+            weak_to=DamageType.PHYSICAL,
             rng=rng,
         ),
         Enemy(
@@ -52,13 +62,14 @@ def build_enemies(rng: random.Random) -> list[Enemy]:
             attack_min=15,
             attack_max=25,
             ascii_art=ASCII_ARTS["Dragon"],
+            weak_to=DamageType.MAGIC,
             rng=rng,
         ),
     ]
 
 
 def get_player_action(_: Battle) -> str:
-    return input("[A]ttack or [H]eal? ").strip().lower()[:1]
+    return input("[S]trike, [M]agic, [D]efend, or [H]eal? ").strip().lower()[:1]
 
 
 def main() -> None:
