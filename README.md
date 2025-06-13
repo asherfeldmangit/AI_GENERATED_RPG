@@ -1,5 +1,12 @@
 # AI_GENERATED_RPG
-Fully ai generated and tested text based rpg game
+Retro-styled JRPG prototype powered by React + Pixi, Electron, and a lightweight Python gameplay core.  
+Play it in the browser **or** install the native desktop build (Windows .EXE installer generated automatically).
+
+## TL;DR – I just want to play (Windows)
+1. Go to the latest [Releases](https://github.com/asherfeldmangit/AI_GENERATED_RPG/releases) page.
+2. Download **`AI-Generated-RPG-Setup-<version>.exe`**.
+3. Double-click the file and follow the wizard – no additional software required.
+4. Launch the "AI Generated RPG" shortcut that appears on your desktop / Start Menu.
 
 ## Prerequisites
 
@@ -38,7 +45,7 @@ $ python main.py
 
 ---
 
-## 3. Front-end (React + Pixi)
+## 3. Front-end – Browser OR Electron
 
 ```bash
 $ cd web
@@ -50,6 +57,12 @@ $ npm run dev -- --host    # pass --host so other devices can access
 # Open the printed URL (default http://localhost:5173)
 ```
 
+### Run as a desktop app (cross-platform dev)
+```bash
+$ cd web
+$ npm run dev:electron          # starts Vite + Electron window with hot-reload
+```
+
 You should now see:
 1. Title screen → click **New Game**.
 2. Opening cinematic (click to skip).
@@ -59,35 +72,32 @@ You should now see:
 
 ---
 
-## 4. Unit tests
+## 4. Unit tests & coverage (should be 15 TS + 13 Py = 28 total)
 
 ```bash
 # JS/TS tests (Vitest)
 $ cd web
-$ npm test --silent
+$ npm test -- --coverage        # generates coverage report in coverage/
 
 # Python tests (Pytest) – from repo root
-$ pytest -q
+$ pytest -q                     # all 13 should pass
 ```
 
-All suites should pass (▲ 11 JS/TS tests, ▲ 13 Python tests).
+A CI workflow blocks merges if any test fails or coverage drops below the configured threshold.
 
 ---
 
-## 5. Production build / demo artifact
+## 5. Production build / Windows installer
 
 ```bash
 $ cd web
-$ npm run build          # outputs static files into web/dist
-$ npm run preview        # serve the production build locally
+# One-click static build (HTML demo)
+$ npm run build
+
+# Create a signed Windows NSIS installer (.exe)
+$ npm run dist:win              # bundles Electron + game assets into dist_electron/
 ```
-
-Each push to **main** triggers the _Build Demo_ GitHub Action which:
-1. Installs deps, runs tests.
-2. Builds production bundle.
-3. Uploads `web/dist/` as **ai_generated_rpg-demo** artifact (kept 14 days).
-
-Download the ZIP directly from the workflow run to share a self-contained HTML demo.
+The generated installer can be uploaded to GitHub Releases so Windows users can simply download and run.
 
 ---
 

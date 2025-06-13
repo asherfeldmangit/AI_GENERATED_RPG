@@ -30,7 +30,8 @@
     "@vitejs/plugin-react": "^4.0.0",
     "vitest": "^0.34.5",
     "electron-builder": "^24.6.4",
-    "concurrently": "^8.0.1"
+    "concurrently": "^8.0.1",
+    "@vitest/coverage-v8": "^0.34.5"
   },
   "main": "electron/main.js",
   "build": {
