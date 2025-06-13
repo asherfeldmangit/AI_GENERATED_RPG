@@ -200,3 +200,12 @@ web/dist/
 web/vite/
 web/public/
 web/assets/
+
+# ASCII Quest Web
+web/ascii-quest-web@*
+
+# Vite Log
+web/vite
+
+# macOS Finder metadata
+.DS_Store
