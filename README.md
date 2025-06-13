@@ -72,7 +72,7 @@ You should now see:
 
 ---
 
-## 4. Unit tests & coverage (should be 15 TS + 13 Py = 28 total)
+## 4. Unit tests & coverage (should be 14 TS + 13 Py = 27 total)
 
 ```bash
 # JS/TS tests (Vitest)

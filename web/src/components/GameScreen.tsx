@@ -6,6 +6,7 @@ import BattleScene from '../scenes/BattleScene';
 import MapScene from '../scenes/MapScene';
 import BattleCommandMenu from './BattleCommandMenu';
 import { playVoice } from '../audio/voiceManager';
+import { audioManager } from '../audio/audioManager';
 
 export default function GameScreen({ party }: { party: Party }) {
   const [engine] = useState(() => new GameEngine(party));
@@ -30,6 +31,19 @@ export default function GameScreen({ party }: { party: Party }) {
       playVoice(scene.voice);
     }
   }, [engine.sceneId]);
+
+  // Update music when phase changes
+  useEffect(() => {
+    audioManager.setPhase(engine.phase);
+  }, [engine.phase]);
+
+  // Monitor risk to switch battle music intensity
+  useEffect(() => {
+    const id = setInterval(() => {
+      audioManager.updateRisk(party.risk);
+    }, 500);
+    return () => clearInterval(id);
+  }, [party]);
 
   const appendAndRerender = () => {
     forceRender((n) => n + 1);
