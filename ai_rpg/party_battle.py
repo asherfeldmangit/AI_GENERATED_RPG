@@ -20,28 +20,39 @@ class PartyBattle:
         self.party = party
         self.enemy = enemy
         self.rng = rng or random.Random()
+        self.log: list[str] = []
 
     def hero_turn(self, hero, action: str) -> str:
         action = action.lower()[:1]
         if action in {"s", "a"}:
             dmg = hero.physical_attack()
             self.enemy.receive_damage(dmg, DamageType.PHYSICAL)
-            return f"{hero.name} strikes for {dmg} physical damage!"
+            msg = f"{hero.name} strikes for {dmg} physical damage!"
+            self.log.append(msg)
+            return msg
         elif action == "m":
             dmg = hero.magic_attack()
             self.enemy.receive_damage(dmg, DamageType.MAGIC)
-            return f"{hero.name} casts a spell for {dmg} magic damage!"
+            msg = f"{hero.name} casts a spell for {dmg} magic damage!"
+            self.log.append(msg)
+            return msg
         elif action == "h":
             try:
                 healed = hero.heal()
-                return f"{hero.name} drinks a potion and recovers {healed} HP!"
+                msg = f"{hero.name} drinks a potion and recovers {healed} HP!"
+                self.log.append(msg)
+                return msg
             except RuntimeError as err:
                 return f"{hero.name}: {err}"
         elif action == "d":
             hero.defending = True
-            return f"{hero.name} assumes a defensive stance!"
+            msg = f"{hero.name} assumes a defensive stance!"
+            self.log.append(msg)
+            return msg
         else:
-            return f"{hero.name} hesitates and loses their turn."
+            msg = f"{hero.name} hesitates and loses their turn."
+            self.log.append(msg)
+            return msg
 
     def enemy_turn(self) -> str:
         if not self.enemy.alive:
@@ -49,7 +60,9 @@ class PartyBattle:
         target = self.rng.choice(self.party.get_alive())
         dmg = self.enemy.attack()
         target.receive_damage(dmg)
-        return f"The {self.enemy.name} hits {target.name} for {dmg} damage!"
+        msg = f"The {self.enemy.name} hits {target.name} for {dmg} damage!"
+        self.log.append(msg)
+        return msg
 
     def play(self, action_callback: Callable[["PartyBattle", str], str]) -> bool:
         """Run the party battle.
@@ -94,4 +107,15 @@ class PartyBattle:
             print(f"Each surviving hero gains {xp_each} XP!")
         else:
             print("The party has fallen...")
-        return self.party.alive 
+        return self.party.alive
+
+    # lightweight round used by GameEngine (no printing)
+    def perform_round(self, actions: list[str]) -> None:
+        # heroes act in given order
+        for hero, act in zip(self.party.get_alive(), actions):
+            self.hero_turn(hero, act)
+            if not self.enemy.alive:
+                return
+        # enemy retaliates if still alive
+        if self.enemy.alive and self.party.alive:
+            self.enemy_turn() 
