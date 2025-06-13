@@ -183,17 +183,27 @@ export default function MapScene({ onEncounter, onShrine }: Props) {
     applyProps: () => {},
   });
 
+  const lightRef = useRef<DynamicLightFilter>(
+    new DynamicLightFilter(new PIXI.Point(0.5, 0.5), 0.35)
+  );
+
+  // Update light center with hero position
+  useEffect(() => {
+    if (!map) return;
+    lightRef.current.setCenter(new PIXI.Point((heroPos.x + 0.5) / map.width, (heroPos.y + 0.5) / map.height));
+  }, [heroPos, map]);
+
+  // Day/night radius tween
+  useEffect(() => {
+    const dayFactor = Math.sin(time * Math.PI * 2) * 0.5 + 0.5; // 0 dawn, 1 noon, 0 dusk
+    const r = 0.2 + 0.3 * (1 - dayFactor); // smaller radius at night
+    lightRef.current.setRadius(r);
+  }, [time]);
+
   return (
     <Stage width={WIDTH} height={HEIGHT} options={{ backgroundColor: 0x000000 }}>
-      {/* Ground & overlay layers */}
-      <Container
-        filters={[
-          new DynamicLightFilter(
-            new PIXI.Point((heroPos.x + 0.5) / map!.width, (heroPos.y + 0.5) / map!.height),
-            0.35
-          ),
-        ]}
-      >
+      {/* Ground & overlay layers with dynamic lighting */}
+      <Container filters={[lightRef.current]}>
         <RTilemap ref={groundRef} />
         <RTilemap ref={overlayRef} />
       </Container>
