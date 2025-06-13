@@ -3,6 +3,7 @@ import { Stage, Container, Graphics, PixiComponent } from '@pixi/react';
 import { CompositeTilemap } from '@pixi/tilemap';
 import * as PIXI from 'pixi.js';
 import { DynamicLightFilter } from '../filters/DynamicLightFilter';
+import { gsap } from 'gsap';
 
 interface Props {
   onEncounter: (zone: string) => void;
@@ -40,6 +41,8 @@ export default function MapScene({ onEncounter, onShrine }: Props) {
   // References for the tilemap containers so we can mutate them when the map loads
   const groundRef = useRef<CompositeTilemap>(null);
   const overlayRef = useRef<CompositeTilemap>(null);
+
+  const shrinePositions = useRef<{x:number;y:number}[]>([]);
 
   // 1. Load the Tiled JSON once at component mount
   useEffect(() => {
@@ -82,6 +85,21 @@ export default function MapScene({ onEncounter, onShrine }: Props) {
 
     // No explicit update call needed in @pixi/tilemap v4 –
     // CompositeTilemap auto-upload occurs on render.
+  }, [map]);
+
+  useEffect(() => {
+    if (!map) return;
+    const shrineLayer = map.layers.find((l) => l.name.toLowerCase() === 'shrine');
+    shrinePositions.current = [];
+    if (shrineLayer) {
+      shrineLayer.data.forEach((gid, idx) => {
+        if (gid !== 0) {
+          const x = (idx % map.width) * map.tilewidth + map.tilewidth/2;
+          const y = Math.floor(idx / map.width) * map.tileheight + map.tileheight/2;
+          shrinePositions.current.push({x,y});
+        }
+      });
+    }
   }, [map]);
 
   // 4. Keyboard handling (same as before, but snap to tile centres)
@@ -191,6 +209,25 @@ export default function MapScene({ onEncounter, onShrine }: Props) {
           }}
         />
       </Container>
+
+      {/* Shrine glow */}
+      {shrinePositions.current.map((p,i)=>(
+        <Container key={i} x={p.x} y={p.y}>
+          <Graphics
+            draw={(g)=>{
+              g.clear();
+              g.beginFill(0xffff66,0.6);
+              g.drawCircle(0,0,8);
+              g.endFill();
+            }}
+            ref={(g)=>{
+              if(g){
+                gsap.to(g, { alpha: 0.2, duration: 1, yoyo: true, repeat: -1, ease: 'sine.inOut'});
+              }
+            }}
+          />
+        </Container>
+      ))}
     </Stage>
   );
 } 

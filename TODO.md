@@ -27,7 +27,7 @@ Derived from DESIGN_REFINEMENT_ROADMAP.md (v2025-06-14). Ordered roughly by depe
 
 ## 5. Mechanics Tuning
 - [ ] Risk FX: red vignette shader when `risk > 80`; pulse opacity with GSAP.
-- [ ] Shrine tile animation: pulsating glow (`@pixi/particle` or simple Graphics alpha tween).
+- [x] Shrine tile animation: pulsating glow (Graphics alpha tween).
 - [ ] Enemy AI variety: introduce `AIType.PATTERN_CYCLE` (Sentinel), `AIType.RANDOM_SKILL`, plus combo reaction to player Resonance type.
 - [ ] Add unit tests for AI decision tables.
 
