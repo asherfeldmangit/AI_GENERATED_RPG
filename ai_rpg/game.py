@@ -8,6 +8,8 @@ from .enemy import Enemy
 from .player import Player
 from .story import story_event
 from .types import DamageType
+from .party import Party
+from .party_battle import PartyBattle
 
 ASCII_ARTS = {
     "Slime": r"""
@@ -65,6 +67,24 @@ def build_enemies(rng: random.Random) -> list[Enemy]:
             weak_to=DamageType.MAGIC,
             rng=rng,
         ),
+        Enemy(
+             "Ice Golem",
+             max_hp=80,
+             attack_min=10,
+             attack_max=18,
+             ascii_art="(Ice Golem ASCII)",
+             weak_to=DamageType.FIRE,
+             rng=rng,
+         ),
+        Enemy(
+             "Necromancer",
+             max_hp=70,
+             attack_min=12,
+             attack_max=20,
+             ascii_art="(Necromancer ASCII)",
+             weak_to=DamageType.PHYSICAL,
+             rng=rng,
+         ),
     ]
 
 
@@ -72,22 +92,37 @@ def get_player_action(_: Battle) -> str:
     return input("[S]trike, [M]agic, [D]efend, or [H]eal? ").strip().lower()[:1]
 
 
+def build_party(rng: random.Random) -> Party:
+    # Create three distinct heroes
+    warrior = Player("Warrior", attack_min=12, attack_max=18, magic_min=4, magic_max=7, rng=rng)
+    mage = Player("Mage", attack_min=4, attack_max=7, magic_min=12, magic_max=18, rng=rng)
+    ranger = Player("Ranger", attack_min=8, attack_max=14, magic_min=6, magic_max=9, rng=rng)
+    return Party([warrior, mage, ranger])
+
+
 def main() -> None:
     rng = random.Random()
     print("Welcome to ASCII Quest!")
     name = input("What is your name, hero? ").strip() or "Hero"
-    player = Player(name, rng=rng)
+    party = build_party(rng)
+    # Rename first hero to player's chosen name
+    party.members[0].name = name or party.members[0].name
+
     enemies = build_enemies(rng)
 
     retries_left = 3
 
     for enemy in enemies:
-        if not player.alive:
+        if not party.alive:
             break
 
         while True:
-            battle = Battle(player, enemy, rng=rng)
-            survived = battle.play(get_player_action)
+            battle = PartyBattle(party, enemy, rng=rng)
+
+            def party_action_callback(btl: PartyBattle, hero_name: str) -> str:
+                return input(f"{hero_name}'s action [S/M/D/H]: ")
+
+            survived = battle.play(party_action_callback)
 
             if survived:
                 # proceed to next enemy
@@ -96,25 +131,25 @@ def main() -> None:
             # defeated
             if retries_left > 0:
                 retries_left -= 1
-                print(f"\nA mysterious power restores you! Retries remaining: {retries_left}\n")
-                # restore player
-                player.hp = player.max_hp
-                if player.potions == 0:
-                    player.potions = 1  # give at least one potion
-                # reset enemy health
+                print(f"\nA mysterious power restores the party! Retries remaining: {retries_left}\n")
+                for hero in party.members:
+                    hero.hp = hero.max_hp
+                    if hero.potions == 0:
+                        hero.potions = 1
                 enemy.hp = enemy.max_hp
                 continue
             else:
                 print("You have exhausted all retries. Your quest ends here.")
                 break
 
-        if not player.alive:
+        if not party.alive:
             break
 
         if enemy is not enemies[-1]:
-            # Present narrative choice before the next encounter
-            story_event(player, rng)
-            print(f"You take a moment to catch your breath before moving on...\n")
+            # Present narrative choice before the next encounter (use first alive hero)
+            lead_hero = next((h for h in party.members if h.alive), party.members[0])
+            story_event(lead_hero, rng)
+            print(f"The party regroups before continuing...\n")
 
     print("Game Over!")
 
