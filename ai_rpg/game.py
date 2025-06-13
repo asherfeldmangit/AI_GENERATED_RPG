@@ -6,6 +6,7 @@ from pathlib import Path
 from .battle import Battle
 from .enemy import Enemy
 from .player import Player
+from .story import story_event
 
 ASCII_ARTS = {
     "Slime": r"""
@@ -72,6 +73,9 @@ def main() -> None:
             break
         battle = Battle(player, enemy, rng=rng)
         battle.play(get_player_action)
+        if player.alive and enemy is not enemies[-1]:
+            # Present narrative choice before the next encounter
+            story_event(player, rng)
         if player.alive:
             print(f"You take a moment to catch your breath before moving on...\n")
     print("Game Over!")
