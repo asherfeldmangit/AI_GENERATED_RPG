@@ -5,6 +5,7 @@ import { HeroAction } from '../logic/partyBattle';
 import BattleScene from '../scenes/BattleScene';
 import MapScene from '../scenes/MapScene';
 import BattleCommandMenu from './BattleCommandMenu';
+import { playVoice } from '../audio/voiceManager';
 
 export default function GameScreen({ party }: { party: Party }) {
   const [engine] = useState(() => new GameEngine(party));
@@ -22,6 +23,13 @@ export default function GameScreen({ party }: { party: Party }) {
     id = requestAnimationFrame(step);
     return () => cancelAnimationFrame(id);
   }, [engine]);
+
+  useEffect(() => {
+    const scene = engine.currentScene();
+    if (scene?.voice) {
+      playVoice(scene.voice);
+    }
+  }, [engine.sceneId]);
 
   const appendAndRerender = () => {
     forceRender((n) => n + 1);

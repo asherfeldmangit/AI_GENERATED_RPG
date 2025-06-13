@@ -1,0 +1,11 @@
+id: forest_split
+flags: [took_forest]
+text: >-
+  The forest path divides. A faint, ethereal glow pulses to the east while tribal drums echo to the west.
+voice: narrator_forest
+choices:
+  - label: "Follow the glow"
+    next: shrine_scene
+    setFlags: [found_shrine]
+  - label: "Investigate the drums"
+    next: battle_goblin_band 
