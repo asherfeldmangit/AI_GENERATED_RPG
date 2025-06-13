@@ -6,7 +6,7 @@ from pathlib import Path
 from .battle import Battle
 from .enemy import Enemy
 from .player import Player
-from .story import story_event
+from .story import story_event, skill_check_event
 from .types import DamageType
 from .party import Party
 from .party_battle import PartyBattle
@@ -94,9 +94,12 @@ def get_player_action(_: Battle) -> str:
 
 def build_party(rng: random.Random) -> Party:
     # Create three distinct heroes
-    warrior = Player("Warrior", attack_min=12, attack_max=18, magic_min=4, magic_max=7, rng=rng)
-    mage = Player("Mage", attack_min=4, attack_max=7, magic_min=12, magic_max=18, rng=rng)
-    ranger = Player("Ranger", attack_min=8, attack_max=14, magic_min=6, magic_max=9, rng=rng)
+    warrior = Player("Warrior", attack_min=12, attack_max=18, magic_min=4, magic_max=7,
+                      strength=16, intelligence=8, dexterity=12, rng=rng)
+    mage = Player("Mage", attack_min=4, attack_max=7, magic_min=12, magic_max=18,
+                  strength=8, intelligence=16, dexterity=10, rng=rng)
+    ranger = Player("Ranger", attack_min=8, attack_max=14, magic_min=6, magic_max=9,
+                    strength=12, intelligence=10, dexterity=16, rng=rng)
     return Party([warrior, mage, ranger])
 
 
@@ -149,6 +152,7 @@ def main() -> None:
             # Present narrative choice before the next encounter (use first alive hero)
             lead_hero = next((h for h in party.members if h.alive), party.members[0])
             story_event(lead_hero, rng)
+            skill_check_event(party, rng)
             print(f"The party regroups before continuing...\n")
 
     print("Game Over!")

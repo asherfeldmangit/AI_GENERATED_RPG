@@ -11,8 +11,8 @@ def test_enemy_weakness_multiplier() -> None:
     player = Player("Mage", magic_min=10, magic_max=10, attack_min=1, attack_max=1, rng=rng)
     battle = Battle(player, enemy, rng=rng)
     msg = battle.player_turn("m")
-    # magic attack does 10*1.5 = 15 damage
-    assert enemy.hp == 25
+    # magic attack does (10+2)*1.5 = 18 damage
+    assert enemy.hp == 22
     assert "magic" in msg
 
 

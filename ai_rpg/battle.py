@@ -61,7 +61,7 @@ class Battle:
             action = player_action_callback(self)
 
             # determine initiatives
-            player_init = self.rng.randint(1, 20) + self.player.speed
+            player_init = self.rng.randint(1, 20) + self.player.effective_speed
             enemy_init = self.rng.randint(1, 20) + self.enemy.speed
 
             if player_init >= enemy_init:

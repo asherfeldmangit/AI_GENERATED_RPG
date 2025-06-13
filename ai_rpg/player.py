@@ -27,6 +27,11 @@ class Player:
 
     hp: int = field(init=False)
 
+    # Attributes
+    strength: int = 10
+    intelligence: int = 10
+    dexterity: int = 10
+
     def __post_init__(self) -> None:
         self.hp = self.max_hp
 
@@ -36,11 +41,13 @@ class Player:
 
     def physical_attack(self) -> int:
         base = self.rng.randint(self.attack_min, self.attack_max)
-        return base + (self.level - 1)
+        attr_bonus = self.strength // 4
+        return base + attr_bonus + (self.level - 1)
 
     def magic_attack(self) -> int:
         base = self.rng.randint(self.magic_min, self.magic_max)
-        return base + (self.level - 1)
+        attr_bonus = self.intelligence // 4
+        return base + attr_bonus + (self.level - 1)
 
     def receive_damage(self, amount: int) -> None:
         if self.defending:
@@ -76,10 +83,19 @@ class Player:
         self.attack_min += 2
         self.attack_max += 2
         self.hp = self.max_hp
+        # Attribute gains
+        self.strength += 1
+        self.intelligence += 1
+        self.dexterity += 1
         print(f"*** {self.name} leveled up to {self.level}! Stats increased. ***")
 
     def full_status(self) -> str:
         return (
             f"{self.name} Lv{self.level} | HP {self.hp}/{self.max_hp} | "
+            f"STR {self.strength} INT {self.intelligence} DEX {self.dexterity} | "
             f"XP {self.experience}/{self.exp_to_next} | Potions: {self.potions}"
-        ) 
+        )
+
+    @property
+    def effective_speed(self) -> int:
+        return self.speed + self.dexterity // 4 

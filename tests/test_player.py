@@ -9,7 +9,7 @@ def test_attack_within_range() -> None:
     rng = random.Random(0)
     p = Player("Tester", attack_min=1, attack_max=3, rng=rng)
     damages = {p.physical_attack() for _ in range(100)}
-    assert damages <= {1, 2, 3}
+    assert damages <= {3, 4, 5}
 
 
 def test_receive_damage_and_alive() -> None:

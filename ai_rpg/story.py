@@ -4,6 +4,7 @@ import random
 from typing import Callable
 
 from .player import Player
+from .party import Party
 
 
 ChoiceCallback = Callable[[str], str]
@@ -59,4 +60,59 @@ def story_event(
     else:
         print("You decide not to dally and travel onward.")
 
-    print(player.full_status()) 
+    print(player.full_status())
+
+
+def skill_check_event(party, rng=None, choose_hero_callback=None):
+    if rng is None:
+        import random as _random
+        rng = _random.Random()
+    if choose_hero_callback is None:
+        choose_hero_callback = lambda prompt, heroes: input(prompt)
+    scenarios = [
+        {
+            "desc": "A rickety rope bridge sways over a deep chasm.",
+            "attr": "dexterity",
+            "dc": 12,
+            "success": "You cross safely.",
+            "fail": "The bridge snaps! You scramble back, scraped and bruised.",
+        },
+        {
+            "desc": "A heavy stone blocks your path.",
+            "attr": "strength",
+            "dc": 14,
+            "success": "With a heroic heave, the stone is moved!",
+            "fail": "It won't budge; your muscles ache afterward.",
+        },
+        {
+            "desc": "Ancient runes glow on a sealed door.",
+            "attr": "intelligence",
+            "dc": 13,
+            "success": "You decipher the glyphs and the door slides open.",
+            "fail": "The puzzle eludes you, and the runes flare angrily, singeing you.",
+        },
+    ]
+    scene = rng.choice(scenarios)
+    print("\n=== Skill Challenge ===")
+    print(scene["desc"])
+    heroes = [h for h in party.members if h.alive]
+    hero_names = ", ".join(h.name for h in heroes)
+    prompt = f"Who will attempt the challenge? ({hero_names}): "
+    chosen_name = choose_hero_callback(prompt, hero_names).strip()
+    hero = next((h for h in heroes if h.name.lower() == chosen_name.lower()), heroes[0])
+
+    roll = rng.randint(1, 20)
+    attr_val = getattr(hero, scene["attr"])
+    total = roll + attr_val // 2
+    print(f"{hero.name} rolls {roll} + {attr_val // 2} = {total} (DC {scene['dc']})")
+
+    if total >= scene["dc"]:
+        print(scene["success"])
+        # reward: small heal
+        healed = min(15, hero.max_hp - hero.hp)
+        hero.hp += healed
+        print(f"{hero.name} feels invigorated and recovers {healed} HP!")
+    else:
+        print(scene["fail"])
+        hero.receive_damage(10)
+        print(f"{hero.name} takes 10 damage!") 

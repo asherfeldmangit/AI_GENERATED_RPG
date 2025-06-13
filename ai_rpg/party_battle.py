@@ -68,7 +68,7 @@ class PartyBattle:
             order = []
             enemy_init = self.rng.randint(1, 20) + self.enemy.speed
             for hero in self.party.get_alive():
-                hero_init = self.rng.randint(1, 20) + hero.speed
+                hero_init = self.rng.randint(1, 20) + hero.effective_speed
                 order.append((hero_init, hero))
             # Add enemy as tuple with its initiative value and None placeholder
             order.append((enemy_init, None))
