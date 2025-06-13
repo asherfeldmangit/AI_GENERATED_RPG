@@ -97,10 +97,17 @@ export class PartyBattle {
     const aliveHeroes = this.party.members.filter((m) => m.alive);
     if (aliveHeroes.length === 0) return;
     const target = aliveHeroes[randomInt(0, aliveHeroes.length - 1)];
-    const dmg = foe.attack();
-    target.hp = Math.max(target.hp - dmg, 0);
-    this.log.push({ text: `${foe.name} hits ${target.name} for ${dmg}` });
-    // Enemies build Void resonance each attack (placeholder)
+    const action = foe.chooseAction?.() ?? 'strike';
+    let dmg = 0;
+    if (action === 'strike') {
+      dmg = foe.attack();
+      target.hp = Math.max(target.hp - dmg, 0);
+      this.log.push({ text: `${foe.name} strikes ${target.name} for ${dmg}` });
+    } else if (action === 'magic') {
+      dmg = foe.attack();
+      target.hp = Math.max(target.hp - dmg, 0);
+      this.log.push({ text: `${foe.name} casts magic on ${target.name} for ${dmg}` });
+    }
     foe.addResonance(EnergyType.VOID);
   }
 
