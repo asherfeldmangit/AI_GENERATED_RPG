@@ -1,6 +1,7 @@
 import { DamageType } from './types';
+import { BattleActor } from './battleActor';
 
-export class Enemy {
+export class Enemy extends BattleActor {
   name: string;
   maxHp: number;
   hp: number;
@@ -9,6 +10,7 @@ export class Enemy {
   weakTo?: DamageType;
 
   constructor(init: ConstructorParameters<typeof Enemy>[0]) {
+    super();
     Object.assign(this, init);
     this.hp = this.maxHp;
   }

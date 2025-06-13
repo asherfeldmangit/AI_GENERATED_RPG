@@ -1,6 +1,6 @@
 import { Party } from './party';
 import { Enemy } from './enemy';
-import { DamageType } from './types';
+import { DamageType, EnergyType } from './types';
 import { randomInt } from './util';
 
 export type HeroAction = 'strike' | 'magic' | 'defend' | 'heal';
@@ -11,28 +11,67 @@ export interface BattleLogEntry {
 
 export class PartyBattle {
   party: Party;
-  enemy: Enemy;
+  enemies: Enemy[];
   log: BattleLogEntry[] = [];
 
-  constructor(party: Party, enemy: Enemy) {
+  heroATB: number[];
+  enemyATB: number[];
+
+  private atbSpeed = 0.6; // static speed per tick (0-100)
+
+  constructor(party: Party, enemies: Enemy[] | Enemy) {
     this.party = party;
-    this.enemy = enemy;
+    this.enemies = Array.isArray(enemies) ? enemies : [enemies];
+    this.heroATB = party.members.map(() => 0);
+    this.enemyATB = this.enemies.map(() => 0);
+  }
+
+  /** Call every frame with delta time (~1) to fill gauges. */
+  tick() {
+    this.heroATB = this.heroATB.map((v, idx) =>
+      this.party.members[idx].alive ? Math.min(100, v + this.atbSpeed) : 0
+    );
+    this.enemyATB = this.enemyATB.map((v, idx) =>
+      this.enemies[idx].alive ? Math.min(100, v + this.atbSpeed) : 0
+    );
+
+    this.enemyATB.forEach((gauge, idx) => {
+      if (gauge >= 100) {
+        this.enemyATB[idx] = 0;
+        this.singleEnemyTurn(idx);
+      }
+    });
   }
 
   private heroTurn(heroIdx: number, action: HeroAction) {
+    this.heroATB[heroIdx] = 0; // reset gauge after acting
     const hero = this.party.members[heroIdx];
     if (!hero.alive) return;
     switch (action) {
       case 'strike': {
+        // Physical attack builds Aether resonance
+        hero.addResonance(EnergyType.AETHER);
         const dmg = hero.physicalAttack();
-        this.enemy.receiveDamage(dmg, DamageType.PHYSICAL);
+        this.enemies[heroIdx].receiveDamage(dmg, DamageType.PHYSICAL);
         this.log.push({ text: `${hero.name} strikes for ${dmg} dmg` });
+        this.party.addRisk(2);
+        // If resonance hits 3, trigger combo buff (placeholder)
+        if (hero.resonance[EnergyType.AETHER] >= 3) {
+          hero.clearResonance();
+          this.log.push({ text: `${hero.name} unleashes Aether Combo!` });
+        }
         break;
       }
       case 'magic': {
+        hero.addResonance(EnergyType.VOID);
         const dmg = hero.magicAttack();
-        this.enemy.receiveDamage(dmg, DamageType.MAGIC);
+        this.enemies[heroIdx].receiveDamage(dmg, DamageType.MAGIC);
         this.log.push({ text: `${hero.name} casts for ${dmg} dmg` });
+        this.party.addRisk(4);
+        if (hero.resonance[EnergyType.VOID] >= 3) {
+          hero.clearResonance();
+          this.log.push({ text: `${hero.name} releases Void Burst!` });
+        }
         break;
       }
       case 'heal': {
@@ -52,23 +91,32 @@ export class PartyBattle {
     }
   }
 
-  private enemyTurn() {
-    if (!this.enemy.alive) return;
-    const target = this.party.members.filter((m) => m.alive)[
-      randomInt(0, this.party.members.filter((m) => m.alive).length - 1)
-    ];
-    const dmg = this.enemy.attack();
+  private singleEnemyTurn(enemyIdx: number) {
+    const foe = this.enemies[enemyIdx];
+    if (!foe.alive) return;
+    const aliveHeroes = this.party.members.filter((m) => m.alive);
+    if (aliveHeroes.length === 0) return;
+    const target = aliveHeroes[randomInt(0, aliveHeroes.length - 1)];
+    const dmg = foe.attack();
     target.hp = Math.max(target.hp - dmg, 0);
-    this.log.push({ text: `${this.enemy.name} hits ${target.name} for ${dmg}` });
+    this.log.push({ text: `${foe.name} hits ${target.name} for ${dmg}` });
+    // Enemies build Void resonance each attack (placeholder)
+    foe.addResonance(EnergyType.VOID);
   }
 
   performRound(actions: HeroAction[]) {
     // initiative simplified: heroes then enemy
     actions.forEach((act, idx) => this.heroTurn(idx, act));
-    this.enemyTurn();
+    this.enemies.forEach((_, idx) => this.singleEnemyTurn(idx));
+    // After round, ensure gauges reset
+    this.heroATB = this.heroATB.map(() => 0);
+    this.enemyATB = this.enemyATB.map(() => 0);
+
+    // Natural risk decay per round
+    this.party.reduceRisk(1);
   }
 
   isBattleOver() {
-    return !this.party.alive || !this.enemy.alive;
+    return !this.party.alive || this.enemies.every((e) => !e.alive);
   }
 } 

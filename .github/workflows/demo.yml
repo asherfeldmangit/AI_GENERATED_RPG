@@ -1,0 +1,41 @@
+name: Build Demo
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-web-demo:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: web
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'npm'
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests
+        run: npm test --silent
+
+      - name: Build production bundle
+        run: npm run build
+
+      - name: Upload demo artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ai_generated_rpg-demo
+          path: web/dist
+          retention-days: 14 

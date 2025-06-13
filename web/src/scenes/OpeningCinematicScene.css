@@ -1,0 +1,58 @@
+.cinematic {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: radial-gradient(ellipse at center, #000 0%, #000 40%, #1d2b53 100%);
+  overflow: hidden;
+  color: #fff;
+  font-family: 'Press Start 2P', monospace, sans-serif;
+  cursor: pointer;
+}
+
+.stars {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: radial-gradient(#fff 1px, transparent 1px);
+  background-size: 3px 3px;
+  opacity: 0;
+  transition: opacity 2s ease-out;
+}
+
+.crawl {
+  position: absolute;
+  width: 100%;
+  text-align: center;
+  font-size: 1.25rem;
+  line-height: 1.5rem;
+  top: 50%;
+  transform: translateY(50%);
+  transition: transform 7s linear;
+  padding: 0 1rem;
+}
+.highlight {
+  color: #ffec27;
+}
+.aether {
+  color: #00c8ff;
+}
+.void {
+  color: #9900ff;
+}
+.skip-hint {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  font-size: 0.75rem;
+  opacity: 0.6;
+}
+
+/* Ensure no body scrollbars while cinematic is up */
+body.no-scroll {
+  margin: 0;
+  overflow: hidden;
+} 

@@ -3,4 +3,9 @@ export enum DamageType {
   MAGIC = 'magic',
   FIRE = 'fire',
   ICE = 'ice',
+}
+
+export enum EnergyType {
+  AETHER = 'aether',
+  VOID = 'void',
 } 

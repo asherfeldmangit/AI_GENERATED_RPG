@@ -18,4 +18,16 @@ describe('Story choice consequences', () => {
     eng.chooseOption(0); // heal path with consequence heal 15
     expect(party.members[0].hp).toBe(65);
   });
+
+  it('battle_sentinel option triggers battle phase', () => {
+    const party = new Party([
+      new Player({ name: 'Hero', attackMin: 1, attackMax: 1, magicMin: 1, magicMax: 1, strength: 10, intelligence: 10, dexterity: 10 })
+    ]);
+    const eng = new GameEngine(party);
+    eng.sceneId = 'chapter1_intro';
+    // choose second option (index 1) => battle_sentinel
+    eng.chooseOption(1);
+    expect(eng.phase).toBe('battle');
+    expect(eng.enemies[0].name).toBe('Sentinel');
+  });
 }); 

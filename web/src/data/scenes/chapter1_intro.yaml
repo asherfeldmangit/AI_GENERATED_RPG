@@ -1,0 +1,9 @@
+id: chapter1_intro
+text: >-
+  Windridge Pass. Cloud shadows race across stone as your caravan escorts the
+  shimmering Relic toward the high outpost. The air hums with unseen energy.
+options:
+  - label: "Watch the skies"
+    next: chapter1_sentinel
+  - label: "Urge the caravan onward"
+    next: battle_sentinel 

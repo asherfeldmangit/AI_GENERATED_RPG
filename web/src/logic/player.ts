@@ -1,6 +1,8 @@
 import { DamageType } from './types';
+import { Weapon, Armour } from './equipment';
+import { BattleActor } from './battleActor';
 
-export class Player {
+export class Player extends BattleActor {
   name: string;
   maxHp: number = 100;
   hp: number;
@@ -13,7 +15,11 @@ export class Player {
   dexterity: number;
   potions = 3;
 
+  weapon?: Weapon;
+  armour?: Armour;
+
   constructor(init: Partial<Player> & { name: string }) {
+    super();
     Object.assign(this, init);
     this.hp = this.maxHp;
   }
@@ -24,7 +30,8 @@ export class Player {
 
   physicalAttack() {
     const base = randomInt(this.attackMin, this.attackMax);
-    return base + Math.floor(this.strength / 4);
+    const weaponBonus = this.weapon ? randomInt(this.weapon.minAttack, this.weapon.maxAttack) : 0;
+    return base + weaponBonus + Math.floor(this.totalStrength() / 4);
   }
 
   magicAttack() {
@@ -38,6 +45,14 @@ export class Player {
     const heal = Math.min(20, this.maxHp - this.hp);
     this.hp += heal;
     return heal;
+  }
+
+  totalStrength() {
+    return this.strength + (this.weapon?.strBonus ?? 0);
+  }
+
+  defense() {
+    return this.armour?.defBonus ?? 0;
   }
 }
 
