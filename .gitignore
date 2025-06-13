@@ -212,3 +212,6 @@ web/vite
 
 # Electron build
 web/dist_electron/
+
+# Vitest coverage output
+web/coverage/
