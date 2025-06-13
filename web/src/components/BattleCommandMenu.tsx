@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { HeroAction } from '../logic/partyBattle';
+import Tooltip from './Tooltip';
 
 interface Props {
   onSelectAction: (action: HeroAction | 'run' | 'item' | 'spell') => void;
@@ -43,9 +44,11 @@ export default function BattleCommandMenu({ onSelectAction, moves, spells, potio
       <div style={boxStyle}>
         <h4 style={{ margin: '0 0 0.5rem 0' }}>Spells</h4>
         {spells.map((s) => (
-          <button key={s.label} onClick={() => onSelectAction('spell')} style={btnStyle}>
-            {s.label} – {s.mp} MP
-          </button>
+          <Tooltip key={s.label} text={`${s.mp} MP`}>
+            <button onClick={() => onSelectAction('spell')} style={btnStyle}>
+              {s.label}
+            </button>
+          </Tooltip>
         ))}
         <button onClick={() => setLayer('root')} style={{ ...btnStyle, marginTop: '0.5rem' }}>
           &larr; Back
@@ -58,13 +61,15 @@ export default function BattleCommandMenu({ onSelectAction, moves, spells, potio
     return (
       <div style={boxStyle}>
         <h4 style={{ margin: '0 0 0.5rem 0' }}>Items</h4>
-        <button
-          disabled={potions <= 0}
-          onClick={() => onSelectAction('item')}
-          style={btnStyle}
-        >
-          Potion ×{potions}
-        </button>
+        <Tooltip text="Heals 25 HP">
+          <button
+            disabled={potions <= 0}
+            onClick={() => onSelectAction('item')}
+            style={btnStyle}
+          >
+            Potion ×{potions}
+          </button>
+        </Tooltip>
         <button onClick={() => setLayer('root')} style={{ ...btnStyle, marginTop: '0.5rem' }}>
           &larr; Back
         </button>

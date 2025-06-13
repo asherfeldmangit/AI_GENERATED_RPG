@@ -7,6 +7,7 @@ import MapScene from '../scenes/MapScene';
 import BattleCommandMenu from './BattleCommandMenu';
 import { playVoice } from '../audio/voiceManager';
 import { audioManager } from '../audio/audioManager';
+import RiskOverlay from './RiskOverlay';
 
 export default function GameScreen({ party }: { party: Party }) {
   const [engine] = useState(() => new GameEngine(party));
@@ -202,6 +203,8 @@ export default function GameScreen({ party }: { party: Party }) {
             </div>
           ))}
       </pre>
+
+      <RiskOverlay risk={party.risk} />
     </div>
   );
 } 
