@@ -35,6 +35,11 @@ export default function GameScreen({ party }: { party: Party }) {
     appendAndRerender();
   };
 
+  const chooseOption = (idx: number) => {
+    engine.chooseOption(idx);
+    appendAndRerender();
+  };
+
   return (
     <div>
       <h2>Party Status</h2>
@@ -54,7 +59,19 @@ export default function GameScreen({ party }: { party: Party }) {
         </div>
       )}
 
-      {engine.phase !== 'battle' && engine.phase !== 'end' && (
+      {engine.phase === 'story' && engine.currentScene() && (
+        <div>
+          <h3>Story</h3>
+          <p>{engine.currentScene()!.text}</p>
+          {engine.currentScene()!.options.map((opt, i) => (
+            <button key={i} onClick={() => chooseOption(i)} style={{ display: 'block', margin: '0.25rem 0' }}>
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {engine.phase === 'skill' && (
         <button onClick={nextPhase}>Continue</button>
       )}
 

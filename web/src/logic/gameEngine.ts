@@ -2,7 +2,7 @@ import { Enemy } from './enemy';
 import { Party } from './party';
 import { PartyBattle, HeroAction } from './partyBattle';
 import { runSkillCheck } from './skillCheck';
-import { DamageType } from './types';
+import { STORY, StoryScene, StoryOption } from '../data/story';
 
 export type Phase = 'story' | 'battle' | 'skill' | 'end';
 
@@ -17,15 +17,21 @@ export class GameEngine {
   phase: Phase = 'story';
   battle?: PartyBattle;
   log: GameEvent[] = [];
+  sceneId: string = 'start';
 
   constructor(party: Party, enemies: Enemy[]) {
     this.party = party;
     this.enemies = enemies;
-    this.log.push({ text: 'The adventure begins!' });
+    const scene = this.currentScene();
+    if (scene) this.log.push({ text: scene.text });
   }
 
   currentEnemy() {
     return this.enemies[this.idx];
+  }
+
+  currentScene(): StoryScene | undefined {
+    return STORY.find((s) => s.id === this.sceneId);
   }
 
   nextPhase() {
@@ -72,5 +78,43 @@ export class GameEngine {
     const res = runSkillCheck(this.party, heroIdx);
     this.log.push({ text: res.text });
     this.nextPhase();
+  }
+
+  chooseOption(optIdx: number) {
+    if (this.phase !== 'story') return;
+    const scene = this.currentScene();
+    if (!scene) return;
+    const option = scene.options[optIdx];
+    if (!option) return;
+
+    // apply consequence
+    if (option.consequence) {
+      if (option.consequence.heal) {
+        this.party.members.forEach((m) => (m.hp = Math.min(m.maxHp, m.hp + option.consequence!.heal!)));
+        this.log.push({ text: `The party heals ${option.consequence.heal}` });
+      }
+      if (option.consequence.damage) {
+        this.party.members.forEach((m) => (m.hp = Math.max(0, m.hp - option.consequence!.damage!)));
+        this.log.push({ text: `The party takes ${option.consequence.damage} damage` });
+      }
+      if (option.consequence.potion) {
+        this.party.members.forEach((m) => (m.potions += option.consequence!.potion!));
+        this.log.push({ text: `Each hero gains a potion` });
+      }
+    }
+
+    if (option.next === 'battle') {
+      this.nextPhase();
+      return;
+    }
+    if (option.next === 'skill') {
+      this.phase = 'skill';
+      return;
+    }
+
+    // normal story scene
+    this.sceneId = option.next;
+    const nextScene = this.currentScene();
+    if (nextScene) this.log.push({ text: nextScene.text });
   }
 } 
