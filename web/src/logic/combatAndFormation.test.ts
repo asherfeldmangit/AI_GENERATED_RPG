@@ -37,8 +37,8 @@ describe('PartyBattle ATB', () => {
 
   it('fills enemy gauge and auto attacks', () => {
     const preLog = battle.log.length;
-    // tick 200 times to ensure gauge full
-    for (let i = 0; i < 200; i++) battle.tick();
+    // tick 400 times to ensure gauge full after slower ATB speed change
+    for (let i = 0; i < 400; i++) battle.tick();
     expect(battle.log.length).toBeGreaterThan(preLog);
   });
 });

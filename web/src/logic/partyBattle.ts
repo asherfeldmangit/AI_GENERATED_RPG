@@ -17,7 +17,7 @@ export class PartyBattle {
   heroATB: number[];
   enemyATB: number[];
 
-  private atbSpeed = 0.6; // static speed per tick (0-100)
+  private atbSpeed = 0.3; // static speed per tick (0-100) – slower to give players more decision time
 
   constructor(party: Party, enemies: Enemy[] | Enemy) {
     this.party = party;
