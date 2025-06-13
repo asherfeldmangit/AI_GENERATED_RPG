@@ -192,3 +192,11 @@ cython_debug/
 #  refer to https://docs.cursor.com/context/ignore-files
 .cursorignore
 .cursorindexingignore
+
+# --- Node / front-end ---
+node_modules/
+web/node_modules/
+web/dist/
+web/vite/
+web/public/
+web/assets/
