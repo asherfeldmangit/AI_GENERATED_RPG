@@ -36,7 +36,7 @@ class Battle:
         self.player.receive_damage(dmg)
         return f"The {self.enemy.name} strikes you for {dmg} damage!"
 
-    def play(self, player_action_callback) -> None:
+    def play(self, player_action_callback) -> bool:
         """Run the battle loop.
 
         player_action_callback should be a function that takes the current battle
@@ -60,4 +60,5 @@ class Battle:
                 self.player.gain_experience(int(xp))
                 print(f"You gain {xp} XP!")
         else:
-            print("You have been defeated...") 
+            print("You have been defeated...")
+        return self.player.alive 

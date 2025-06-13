@@ -68,16 +68,43 @@ def main() -> None:
     player = Player(name, rng=rng)
     enemies = build_enemies(rng)
 
+    retries_left = 3
+
     for enemy in enemies:
         if not player.alive:
             break
-        battle = Battle(player, enemy, rng=rng)
-        battle.play(get_player_action)
-        if player.alive and enemy is not enemies[-1]:
+
+        while True:
+            battle = Battle(player, enemy, rng=rng)
+            survived = battle.play(get_player_action)
+
+            if survived:
+                # proceed to next enemy
+                break
+
+            # defeated
+            if retries_left > 0:
+                retries_left -= 1
+                print(f"\nA mysterious power restores you! Retries remaining: {retries_left}\n")
+                # restore player
+                player.hp = player.max_hp
+                if player.potions == 0:
+                    player.potions = 1  # give at least one potion
+                # reset enemy health
+                enemy.hp = enemy.max_hp
+                continue
+            else:
+                print("You have exhausted all retries. Your quest ends here.")
+                break
+
+        if not player.alive:
+            break
+
+        if enemy is not enemies[-1]:
             # Present narrative choice before the next encounter
             story_event(player, rng)
-        if player.alive:
             print(f"You take a moment to catch your breath before moving on...\n")
+
     print("Game Over!")
 
 
