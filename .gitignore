@@ -209,3 +209,6 @@ web/vite
 
 # macOS Finder metadata
 .DS_Store
+
+# Electron build
+web/dist_electron/

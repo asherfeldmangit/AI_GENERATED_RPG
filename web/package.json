@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "vitest"
+    "test": "vitest",
+    "dev:electron": "concurrently \"vite\" \"electron .\"",
+    "dist:win": "npm run build && electron-builder --win --x64"
   },
   "dependencies": {
     "react": "^18.2.0",
@@ -17,7 +19,8 @@
     "@pixi/tilemap": "^4.0.2",
     "gsap": "^3.12.2",
     "howler": "^2.2.3",
-    "classnames": "^2.3.2"
+    "classnames": "^2.3.2",
+    "electron": "^28.2.3"
   },
   "devDependencies": {
     "@types/react": "^18.0.24",
@@ -25,6 +28,32 @@
     "typescript": "^5.0.2",
     "vite": "^4.1.0",
     "@vitejs/plugin-react": "^4.0.0",
-    "vitest": "^0.34.5"
+    "vitest": "^0.34.5",
+    "electron-builder": "^24.6.4",
+    "concurrently": "^8.0.1"
+  },
+  "main": "electron/main.js",
+  "build": {
+    "appId": "com.ai.generated.rpg",
+    "productName": "AI Generated RPG",
+    "directories": {
+      "output": "dist_electron"
+    },
+    "files": [
+      "dist/**",
+      "electron/**",
+      "package.json"
+    ],
+    "extraFiles": [
+      {
+        "from": "assets",
+        "to": "assets",
+        "filter": ["**/*"]
+      }
+    ],
+    "win": {
+      "target": "nsis",
+      "artifactName": "AI-Generated-RPG-Setup-${version}.${ext}"
+    }
   }
 } 
