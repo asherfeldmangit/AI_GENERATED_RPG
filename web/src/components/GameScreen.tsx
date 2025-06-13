@@ -8,9 +8,14 @@ import BattleCommandMenu from './BattleCommandMenu';
 import { playVoice } from '../audio/voiceManager';
 import { audioManager } from '../audio/audioManager';
 import RiskOverlay from './RiskOverlay';
+import { saveGame } from '../logic/autoSave';
 
-export default function GameScreen({ party }: { party: Party }) {
-  const [engine] = useState(() => new GameEngine(party));
+export default function GameScreen({ party, initialSceneId }: { party: Party; initialSceneId?: string }) {
+  const [engine] = useState(() => {
+    const eng = new GameEngine(party);
+    if (initialSceneId) eng.sceneId = initialSceneId;
+    return eng;
+  });
   const [, forceRender] = useState(0);
   const [actionSelections, setActionSelections] = useState<Record<number, HeroAction>>({});
 
@@ -45,6 +50,11 @@ export default function GameScreen({ party }: { party: Party }) {
     }, 500);
     return () => clearInterval(id);
   }, [party]);
+
+  // Auto-save whenever scene or party changes
+  useEffect(() => {
+    saveGame(engine.sceneId, party);
+  }, [engine.sceneId, party]);
 
   const appendAndRerender = () => {
     forceRender((n) => n + 1);

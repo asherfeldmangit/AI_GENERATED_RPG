@@ -22,7 +22,7 @@ Derived from DESIGN_REFINEMENT_ROADMAP.md (v2025-06-14). Ordered roughly by depe
 
 ## 4. UI / UX Polish
 - [ ] Tooltip component (`<Tooltip text="…" />`) rendered on hover for items/spells.
-- [ ] Auto-save service: write/restore JSON payload to IndexedDB `ai_rpg_save_v1` on map transition & quit.
+- [x] Auto-save service: write/restore JSON payload to localStorage `ai_rpg_save_v1` on map transition & quit.
 - [ ] Add ESC → pause menu with "Save", "Options", "Quit".
 
 ## 5. Mechanics Tuning

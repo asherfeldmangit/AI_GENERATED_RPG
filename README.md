@@ -70,6 +70,8 @@ You should now see:
 4. Overworld (Windridge Trail) with dynamic lighting & shrine tiles.
 5. ATB battles with Elemental Resonance, Risk meter, and command menu.
 
+After you see the game, feel free to close the tab – **progress auto-saves** to your browser (localStorage) and will resume on your next visit.
+
 ---
 
 ## 4. Unit tests & coverage (should be 14 TS + 13 Py = 27 total)
@@ -110,3 +112,5 @@ $ node scripts/aseprite_export.js art/tileset_fflike.aseprite
 ```
 
 The script applies the 28-colour palette in `web/assets/palette_fflike.json` and writes trimmed PNGs to an `export/` folder.
+
+-You can quit anytime – your progress auto-saves to the browser and resumes next visit.
