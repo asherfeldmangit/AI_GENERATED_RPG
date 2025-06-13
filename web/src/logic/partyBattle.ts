@@ -2,6 +2,7 @@ import { Party } from './party';
 import { Enemy } from './enemy';
 import { DamageType, EnergyType } from './types';
 import { randomInt } from './util';
+import { playStinger } from '../audio/stingers';
 
 export type HeroAction = 'strike' | 'magic' | 'defend' | 'heal';
 
@@ -59,6 +60,7 @@ export class PartyBattle {
         if (hero.resonance[EnergyType.AETHER] >= 3) {
           hero.clearResonance();
           this.log.push({ text: `${hero.name} unleashes Aether Combo!` });
+          playStinger('aether');
         }
         break;
       }
@@ -71,6 +73,7 @@ export class PartyBattle {
         if (hero.resonance[EnergyType.VOID] >= 3) {
           hero.clearResonance();
           this.log.push({ text: `${hero.name} releases Void Burst!` });
+          playStinger('void');
         }
         break;
       }
