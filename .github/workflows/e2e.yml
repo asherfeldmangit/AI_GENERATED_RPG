@@ -1,0 +1,25 @@
+name: e2e
+
+on:
+  pull_request:
+    paths:
+      - 'web/**'
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - run: npm ci --prefix web
+      - run: npx playwright install --with-deps
+      - run: npm run dev --prefix web -- --host &
+        env:
+          NODE_OPTIONS: '--max-old-space-size=4096'
+        continue-on-error: false
+      - run: npx wait-on http://localhost:5173
+      - run: npm run test:e2e --prefix web 
