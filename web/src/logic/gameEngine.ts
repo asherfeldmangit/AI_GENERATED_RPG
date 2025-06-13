@@ -1,8 +1,10 @@
-import { Enemy } from './enemy';
+import { Monster } from './monster';
 import { Party } from './party';
 import { PartyBattle, HeroAction } from './partyBattle';
 import { runSkillCheck } from './skillCheck';
 import { STORY, StoryScene, StoryOption } from '../data/story';
+import { randomFormation } from '../data/formations';
+import { getScene } from '../data/sceneLoader';
 
 export type Phase = 'story' | 'battle' | 'skill' | 'end';
 
@@ -12,26 +14,32 @@ export interface GameEvent {
 
 export class GameEngine {
   party: Party;
-  enemies: Enemy[];
-  idx = 0;
+  enemies: Monster[] = [];
   phase: Phase = 'story';
   battle?: PartyBattle;
   log: GameEvent[] = [];
   sceneId: string = 'start';
+  private flags: Record<string, boolean> = {}; // story progression flags
 
-  constructor(party: Party, enemies: Enemy[]) {
+  constructor(party: Party) {
     this.party = party;
-    this.enemies = enemies;
     const scene = this.currentScene();
     if (scene) this.log.push({ text: scene.text });
   }
 
+  startEncounter(zone: string) {
+    this.enemies = randomFormation(zone);
+    this.phase = 'battle';
+    this.battle = new PartyBattle(this.party, this.enemies);
+    this.log.push({ text: `Enemies appear!` });
+  }
+
   currentEnemy() {
-    return this.enemies[this.idx];
+    return this.enemies.find((e) => e.alive) ?? this.enemies[0];
   }
 
   currentScene(): StoryScene | undefined {
-    return STORY.find((s) => s.id === this.sceneId);
+    return getScene(this.sceneId) || STORY.find((s) => s.id === this.sceneId);
   }
 
   nextPhase() {
@@ -40,18 +48,14 @@ export class GameEngine {
       this.log.push({ text: 'The party has fallen.' });
       return;
     }
-    if (this.idx >= this.enemies.length) {
-      this.phase = 'end';
-      this.log.push({ text: 'All enemies defeated! Victory!' });
+    if (this.phase === 'battle' && this.battle && this.battle.isBattleOver()) {
+      this.phase = 'story';
+      this.log.push({ text: 'Enemies defeated!' });
       return;
     }
     switch (this.phase) {
       case 'story':
-        // Start battle
-        this.battle = new PartyBattle(this.party, this.currentEnemy());
-        this.phase = 'battle';
-        this.log.push({ text: `A wild ${this.currentEnemy().name} appears!` });
-        break;
+        break; // narrative handled elsewhere
       case 'battle':
         this.phase = 'skill';
         break;
@@ -68,7 +72,8 @@ export class GameEngine {
     this.log.push(...this.battle.log);
     this.battle.log = [];
     if (this.battle.isBattleOver()) {
-      this.log.push({ text: this.battle.enemy.alive ? 'Retreat!' : 'Enemy defeated!' });
+      const anyAlive = this.enemies.some((e) => e.alive);
+      this.log.push({ text: anyAlive ? 'Retreat!' : 'Enemies defeated!' });
       this.nextPhase();
     }
   }
@@ -87,6 +92,12 @@ export class GameEngine {
     const option = scene.options[optIdx];
     if (!option) return;
 
+    // respect required flags (if any)
+    if (option.requiresFlags && !option.requiresFlags.every((f) => this.flags[f])) {
+      this.log.push({ text: 'That option is not available right now.' });
+      return;
+    }
+
     // apply consequence
     if (option.consequence) {
       if (option.consequence.heal) {
@@ -103,8 +114,10 @@ export class GameEngine {
       }
     }
 
-    if (option.next === 'battle') {
-      this.nextPhase();
+    if (option.next.startsWith('battle')) {
+      const parts = option.next.split('_');
+      const zone = parts[1] ?? 'windridge';
+      this.startEncounter(zone);
       return;
     }
     if (option.next === 'skill') {
@@ -116,5 +129,16 @@ export class GameEngine {
     this.sceneId = option.next;
     const nextScene = this.currentScene();
     if (nextScene) this.log.push({ text: nextScene.text });
+
+    // set any story flags from this option
+    if (option.setFlags) {
+      option.setFlags.forEach((f) => { this.flags[f] = true; });
+    }
+  }
+
+  tickBattle() {
+    if (this.phase === 'battle' && this.battle) {
+      this.battle.tick();
+    }
   }
 } 

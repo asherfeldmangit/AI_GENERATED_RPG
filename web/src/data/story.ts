@@ -6,12 +6,17 @@ export interface StoryOption {
     damage?: number;
     potion?: number;
   };
+  voice?: string;
+  setFlags?: string[];
+  requiresFlags?: string[];
 }
 
 export interface StoryScene {
   id: string;
   text: string;
   options: StoryOption[];
+  flags?: string[];
+  voice?: string;
 }
 
 export const STORY: StoryScene[] = [
