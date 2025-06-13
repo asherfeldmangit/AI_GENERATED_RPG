@@ -9,6 +9,7 @@ import { playVoice } from '../audio/voiceManager';
 import { audioManager } from '../audio/audioManager';
 import RiskOverlay from './RiskOverlay';
 import { saveGame } from '../logic/autoSave';
+import PauseMenu from './PauseMenu';
 
 export default function GameScreen({ party, initialSceneId }: { party: Party; initialSceneId?: string }) {
   const [engine] = useState(() => {
@@ -18,6 +19,7 @@ export default function GameScreen({ party, initialSceneId }: { party: Party; in
   });
   const [, forceRender] = useState(0);
   const [actionSelections, setActionSelections] = useState<Record<number, HeroAction>>({});
+  const [paused, setPaused] = useState(false);
 
   // frame loop for ATB updates
   useEffect(() => {
@@ -55,6 +57,16 @@ export default function GameScreen({ party, initialSceneId }: { party: Party; in
   useEffect(() => {
     saveGame(engine.sceneId, party);
   }, [engine.sceneId, party]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setPaused((p) => !p);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   const appendAndRerender = () => {
     forceRender((n) => n + 1);
@@ -215,6 +227,8 @@ export default function GameScreen({ party, initialSceneId }: { party: Party; in
       </pre>
 
       <RiskOverlay risk={party.risk} />
+
+      {paused && <PauseMenu onResume={() => setPaused(false)} />}
     </div>
   );
 } 
