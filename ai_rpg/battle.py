@@ -55,5 +55,9 @@ class Battle:
         print("\nBattle Over!")
         if self.player.alive:
             print("You are victorious!")
+            if not self.enemy.alive:
+                xp = self.enemy.exp_reward  # type: ignore[arg-type]
+                self.player.gain_experience(int(xp))
+                print(f"You gain {xp} XP!")
         else:
             print("You have been defeated...") 
