@@ -8,8 +8,6 @@ from .enemy import Enemy
 from .player import Player
 from .story import story_event, skill_check_event
 from .types import DamageType
-from .party import Party
-from .party_battle import PartyBattle
 
 ASCII_ARTS = {
     "Slime": r"""
@@ -92,24 +90,75 @@ def get_player_action(_: Battle) -> str:
     return input("[S]trike, [M]agic, [D]efend, or [H]eal? ").strip().lower()[:1]
 
 
-def build_party(rng: random.Random) -> Party:
-    # Create three distinct heroes
-    warrior = Player("Warrior", attack_min=12, attack_max=18, magic_min=4, magic_max=7,
-                      strength=16, intelligence=8, dexterity=12, rng=rng)
-    mage = Player("Mage", attack_min=4, attack_max=7, magic_min=12, magic_max=18,
-                  strength=8, intelligence=16, dexterity=10, rng=rng)
-    ranger = Player("Ranger", attack_min=8, attack_max=14, magic_min=6, magic_max=9,
-                    strength=12, intelligence=10, dexterity=16, rng=rng)
-    return Party([warrior, mage, ranger])
+# Party modules
+from .party import Party
+from .party_battle import PartyBattle
+
+CLASS_TEMPLATES = {
+    "warrior": dict(
+        attack_min=12,
+        attack_max=18,
+        magic_min=4,
+        magic_max=7,
+        strength=16,
+        intelligence=8,
+        dexterity=12,
+    ),
+    "mage": dict(
+        attack_min=4,
+        attack_max=7,
+        magic_min=12,
+        magic_max=18,
+        strength=8,
+        intelligence=16,
+        dexterity=10,
+    ),
+    "ranger": dict(
+        attack_min=8,
+        attack_max=14,
+        magic_min=6,
+        magic_max=9,
+        strength=12,
+        intelligence=10,
+        dexterity=16,
+    ),
+}
+
+
+def interactive_party_creation(rng: random.Random) -> Party:
+    print("\n=== Party Creation ===")
+    print("Available classes: Warrior, Mage, Ranger")
+    try:
+        count = int(input("How many party members? (1-3, default 3): ") or 3)
+    except ValueError:
+        count = 3
+    count = max(1, min(count, 3))
+
+    members: list[Player] = []
+    for idx in range(count):
+        name = input(f"Enter name for hero {idx+1}: ").strip() or f"Hero{idx+1}"
+        cls = input("Choose class (Warrior/Mage/Ranger): ").strip().lower() or "warrior"
+        if cls not in CLASS_TEMPLATES:
+            print("Unknown class, defaulting to Warrior.")
+            cls = "warrior"
+        stats = CLASS_TEMPLATES[cls]
+        members.append(Player(name, rng=rng, **stats))
+    return Party(members)
 
 
 def main() -> None:
     rng = random.Random()
     print("Welcome to ASCII Quest!")
     name = input("What is your name, hero? ").strip() or "Hero"
-    party = build_party(rng)
-    # Rename first hero to player's chosen name
-    party.members[0].name = name or party.members[0].name
+    # Interactive party setup
+    party = interactive_party_creation(rng)
+
+    print("\n=== Prologue ===")
+    print(
+        "After years of darkness, rumours speak of a dragon's curse spreading across the realm. "
+        "Your newly formed party sets out from the village gate, hearts full of courage and packs "
+        "full of supplies. The road ahead will test your mettle...\n"
+    )
 
     enemies = build_enemies(rng)
 
